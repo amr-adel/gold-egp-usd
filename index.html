@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#112d31" />
+    <title>Egypt gold price calculator</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #183438;
+        --muted: #657779;
+        --paper: #f5f4ed;
+        --panel: #fffefa;
+        --line: #d9dfd9;
+        --deep: #112d31;
+        --deep-soft: #1c4143;
+        --gold: #c79643;
+        --gold-light: #f0d69e;
+        --shadow: 0 18px 48px rgba(18, 45, 49, 0.09);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        background:
+          radial-gradient(
+            ellipse at 50% -28%,
+            rgba(109, 165, 160, 0.22),
+            transparent 45%
+          ),
+          var(--paper);
+        font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .page {
+        width: min(100% - 40px, 780px);
+        margin: 0 auto;
+        padding: 54px 0 42px;
+      }
+      .prices {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        overflow: hidden;
+        border: 1px solid rgba(240, 214, 158, 0.19);
+        border-radius: 16px;
+        background: var(--deep);
+        box-shadow: var(--shadow);
+        color: #fffefa;
+      }
+      .price {
+        position: relative;
+        min-width: 0;
+        padding: 25px 28px 24px;
+        text-align: center;
+      }
+      .price + .price {
+        border-left: 1px solid rgba(255, 255, 255, 0.16);
+      }
+      .price-label {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 9px;
+        margin-bottom: 15px;
+      }
+      .karat {
+        color: var(--gold-light);
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .purity {
+        color: #b8c9c5;
+        font-size: 12px;
+      }
+      .amount {
+        display: block;
+        overflow: hidden;
+        color: #fffefa;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(30px, 6vw, 42px);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.035em;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .unit {
+        margin-top: 7px;
+        color: #b8c9c5;
+        font-size: 12px;
+      }
+      .equation {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 15px 0 27px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .equation::before,
+      .equation::after {
+        height: 1px;
+        flex: 1;
+        background: var(--line);
+        content: "";
+      }
+      .equation strong {
+        color: var(--deep-soft);
+        font-weight: 650;
+      }
+      .controls {
+        padding: 26px 28px 25px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--panel);
+        box-shadow: 0 8px 26px rgba(18, 45, 49, 0.035);
+      }
+      .controls h2 {
+        margin: 0;
+        color: var(--deep);
+        font-size: 17px;
+        font-weight: 700;
+      }
+      .controls-intro {
+        margin: 6px 0 24px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .control + .control {
+        margin-top: 24px;
+        padding-top: 22px;
+        border-top: 1px solid #e8ebe5;
+      }
+      .control-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+      }
+      .control label {
+        color: var(--ink);
+        font-size: 14px;
+        font-weight: 650;
+      }
+      output {
+        min-width: 88px;
+        padding: 7px 10px;
+        border: 1px solid #dce4dd;
+        border-radius: 7px;
+        background: #f5f7f2;
+        color: var(--deep);
+        font-size: 14px;
+        font-variant-numeric: tabular-nums;
+        font-weight: 700;
+        text-align: right;
+      }
+      input[type="range"] {
+        display: block;
+        width: 100%;
+        height: 24px;
+        margin: 13px 0 4px;
+        accent-color: var(--gold);
+        cursor: pointer;
+      }
+      input[type="range"]:focus-visible {
+        outline: 3px solid rgba(109, 165, 160, 0.6);
+        outline-offset: 4px;
+        border-radius: 4px;
+      }
+      .range-labels {
+        display: flex;
+        justify-content: space-between;
+        color: #7d8a88;
+        font-size: 11px;
+        font-variant-numeric: tabular-nums;
+      }
+      @media (max-width: 560px) {
+        .page {
+          width: min(100% - 28px, 780px);
+          padding-top: 30px;
+        }
+        .price {
+          padding: 21px 16px;
+        }
+        .price-label {
+          display: block;
+          margin-bottom: 12px;
+        }
+        .purity {
+          display: block;
+          margin-top: 4px;
+        }
+        .amount {
+          font-size: clamp(25px, 7vw, 34px);
+        }
+        .controls {
+          padding: 22px 19px;
+        }
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .amount {
+          transition: color 160ms ease;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="prices" aria-label="Estimated gold prices per gram">
+        <div class="price">
+          <div class="price-label">
+            <span class="karat">21 karat</span
+            ><span class="purity">87.5% pure</span>
+          </div>
+          <strong class="amount" id="price21" aria-live="polite">—</strong>
+          <div class="unit">Egyptian pounds per gram</div>
+        </div>
+        <div class="price">
+          <div class="price-label">
+            <span class="karat">24 karat</span
+            ><span class="purity">99.9% reference</span>
+          </div>
+          <strong class="amount" id="price24" aria-live="polite">—</strong>
+          <div class="unit">Egyptian pounds per gram</div>
+        </div>
+      </section>
+
+      <div class="equation">
+        <span>21k = 87.5% of the 24k price</span>
+      </div>
+
+      <section class="controls" aria-labelledby="controls-title">
+        <h2 id="controls-title">Adjust the market inputs</h2>
+        <p class="controls-intro">
+          Move either slider to recalculate both prices instantly.
+        </p>
+
+        <div class="control">
+          <div class="control-head">
+            <label for="exchange">USD to EGP exchange rate</label>
+            <output id="exchangeValue" for="exchange">50 EGP</output>
+          </div>
+          <input
+            id="exchange"
+            type="range"
+            min="45"
+            max="60"
+            step="0.1"
+            value="50"
+          />
+          <div class="range-labels">
+            <span>45 EGP / USD</span><span>60 EGP / USD</span>
+          </div>
+        </div>
+
+        <div class="control">
+          <div class="control-head">
+            <label for="ounce">Global 24k gold price per troy ounce</label>
+            <output id="ounceValue" for="ounce">$4,000</output>
+          </div>
+          <input
+            id="ounce"
+            type="range"
+            min="3500"
+            max="6000"
+            step="1"
+            value="4000"
+          />
+          <div class="range-labels">
+            <span>$3,500 / oz</span><span>$6,000 / oz</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        const gramsPerTroyOunce = 31.1034768;
+        const storageKey = "egypt-gold-calculator-inputs";
+        const exchange = document.getElementById("exchange");
+        const ounce = document.getElementById("ounce");
+        const price21 = document.getElementById("price21");
+        const price24 = document.getElementById("price24");
+        const exchangeValue = document.getElementById("exchangeValue");
+        const ounceValue = document.getElementById("ounceValue");
+        const egp = new Intl.NumberFormat("en-EG", {
+          maximumFractionDigits: 0,
+        });
+        const usd = new Intl.NumberFormat("en-US", {
+          maximumFractionDigits: 0,
+        });
+
+        try {
+          const saved = JSON.parse(localStorage.getItem(storageKey));
+          if (saved && typeof saved === "object") {
+            for (const [slider, value] of [
+              [exchange, saved.exchange],
+              [ounce, saved.ounce],
+            ]) {
+              const number = Number(value);
+              if (
+                value !== null &&
+                value !== undefined &&
+                Number.isFinite(number) &&
+                number >= Number(slider.min) &&
+                number <= Number(slider.max)
+              ) {
+                slider.value = String(number);
+              }
+            }
+          }
+        } catch {
+          // Keep the default slider values if saved data is unavailable.
+        }
+
+        function updateReadouts() {
+          const egpPerUsd = Number(exchange.value);
+          const usdPerOunce = Number(ounce.value);
+          exchangeValue.textContent = `${egpPerUsd.toFixed(2)} EGP`;
+          ounceValue.textContent = `$${usd.format(usdPerOunce)}`;
+        }
+
+        function updatePrices() {
+          const egpPerUsd = Number(exchange.value);
+          const usdPerOunce = Number(ounce.value);
+          const perGram24 = (usdPerOunce / gramsPerTroyOunce) * egpPerUsd;
+          const perGram21 = perGram24 * (21 / 24);
+
+          price24.textContent = `${egp.format(perGram24)}`;
+          price21.textContent = `${egp.format(perGram21)}`;
+        }
+
+        function saveInputs() {
+          const egpPerUsd = Number(exchange.value);
+          const usdPerOunce = Number(ounce.value);
+          try {
+            localStorage.setItem(
+              storageKey,
+              JSON.stringify({
+                exchange: egpPerUsd,
+                ounce: usdPerOunce,
+              }),
+            );
+          } catch {
+            // The calculator still works when local storage is unavailable.
+          }
+        }
+
+        for (const slider of [exchange, ounce]) {
+          slider.addEventListener("input", updateReadouts);
+          slider.addEventListener("change", () => {
+            updatePrices();
+            saveInputs();
+          });
+        }
+        updateReadouts();
+        updatePrices();
+      })();
+    </script>
+  </body>
+</html>
